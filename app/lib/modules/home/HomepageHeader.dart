@@ -15,7 +15,7 @@ class HomepageHeader extends StatelessWidget {
           children: [
             Text("NewsHub", style: TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight(700))),
             Row(
-              spacing: -5,
+              spacing: 1,
               children: [
                 const IconButton(icon: Icon(Icons.search), tooltip: "Search", onPressed: null, iconSize: 32,),
                 const IconButton(icon: Icon(Icons.bookmark_border_outlined), tooltip: "Favorites", onPressed: null, iconSize: 32,)
