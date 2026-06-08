@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class HomeSearchBar extends StatefulWidget {
   final Widget title;
   final List<Widget> actions;
+  final Widget? leading;
 
   const HomeSearchBar({
     super.key,
     required this.title,
     this.actions = const [],
+    this.leading,
   });
 
   @override
@@ -73,7 +75,12 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          widget.title,
+          Row(
+            children: [
+              if (widget.leading != null) widget.leading!,
+              widget.title,
+            ],
+          ),
           Row(
             children: [
               IconButton(

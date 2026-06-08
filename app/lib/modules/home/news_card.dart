@@ -5,6 +5,9 @@ class NewsCard extends StatelessWidget {
   final String title;
   final String author;
   final String postedAt;
+  final bool isFavorite;
+  final VoidCallback? onTap;
+  final VoidCallback? onToggleFavorite;
 
   const NewsCard({
     super.key,
@@ -12,6 +15,9 @@ class NewsCard extends StatelessWidget {
     required this.author,
     required this.postedAt,
     required this.imageUrl,
+    this.isFavorite = false,
+    this.onTap,
+    this.onToggleFavorite,
   });
 
   static const _horizontalBreakpoint = 600.0;
@@ -26,13 +32,16 @@ class NewsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
       ),
       clipBehavior: Clip.antiAlias,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth >= _horizontalBreakpoint) {
-            return _buildHorizontal(constraints.maxWidth);
-          }
-          return _buildVertical();
-        },
+      child: InkWell(
+        onTap: onTap,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth >= _horizontalBreakpoint) {
+              return _buildHorizontal(constraints.maxWidth);
+            }
+            return _buildVertical();
+          },
+        ),
       ),
     );
   }
@@ -103,12 +112,14 @@ class NewsCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.bookmark_add_outlined),
-                color: Colors.grey.shade600,
+                icon: Icon(
+                  isFavorite ? Icons.bookmark : Icons.bookmark_add_outlined,
+                ),
+                color: isFavorite ? Colors.deepPurple : Colors.grey.shade600,
                 iconSize: 20,
                 visualDensity: VisualDensity.compact,
-                tooltip: "Save",
-                onPressed: () {},
+                tooltip: isFavorite ? "Remover" : "Salvar",
+                onPressed: onToggleFavorite,
               ),
             ],
           ),
