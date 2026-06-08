@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class Section {
-  String title = "";
-  String linkTo = "";
+  final String title;
+  final String linkTo;
 
-  Section(this.title, this.linkTo);
+  const Section(this.title, this.linkTo);
 }
 
 class HomepageSectionList extends StatelessWidget {
@@ -13,21 +13,37 @@ class HomepageSectionList extends StatelessWidget {
   const HomepageSectionList({super.key, required this.sections});
 
   @override
-  Widget build(BuildContext context){
-    return Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
-          spacing: 15,
-          children: sections.map((Section s) {
-            return Container(
-              height: 30,
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-              decoration: const BoxDecoration(color: Colors.grey, borderRadius: BorderRadius.all(Radius.circular(8))),
-              child: Text(s.title, style: TextStyle(color: Colors.black87, fontWeight: FontWeight(500)),),
-            );
-          }).toList()
-        )
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 56,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        itemCount: sections.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final section = sections[index];
+          return InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () {},
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                section.title,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
