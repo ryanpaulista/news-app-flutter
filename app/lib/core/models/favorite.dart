@@ -19,7 +19,7 @@ class Favorite {
     required this.savedAt,
   });
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap() { // objeto -> banco de dados
     return {
       'id': id,
       'title': title,
@@ -31,7 +31,7 @@ class Favorite {
     };
   }
 
-  factory Favorite.fromMap(Map<String, dynamic> map) {
+  factory Favorite.fromMap(Map<String, dynamic> map) { // banco de dados -> objeto
     return Favorite(
       id: map['id'] as String,
       title: map['title'] as String,

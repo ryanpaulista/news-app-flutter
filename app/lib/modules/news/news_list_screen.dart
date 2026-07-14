@@ -54,7 +54,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
     await _refreshFavorites();
   }
 
-  Future<void> _load() async {
+  Future<void> _load() async { // load articles from api and refresh favorites
     setState(() {
       _loading = true;
       _error = null;
