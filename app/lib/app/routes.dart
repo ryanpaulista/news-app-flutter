@@ -2,6 +2,7 @@ class AppRoutes {
   AppRoutes._();
 
   static const String login = '/login';
+  static const String news = '/news';
   static const String main = '/main';
   static const String settings = '/settings';
 

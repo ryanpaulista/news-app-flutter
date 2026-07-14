@@ -1,29 +1,58 @@
-import 'package:app/core/favorites_store.dart';
+import 'package:app/core/db/app_database.dart';
 import 'package:app/core/models/article.dart';
+import 'package:app/core/models/favorite.dart';
 import 'package:flutter/material.dart';
 
-class NewsDetailScreen extends StatelessWidget {
+class NewsDetailScreen extends StatefulWidget {
   final Article article;
 
   const NewsDetailScreen({super.key, required this.article});
 
-  void _close(BuildContext context) {
-    final bool result = favoritesStore.isFavorite(article.id);
-    debugPrint('[Detail] pop result(isFavorite)=$result id=${article.id}');
-    Navigator.of(context).pop(result);
+  @override
+  State<NewsDetailScreen> createState() => _NewsDetailScreenState();
+}
+
+class _NewsDetailScreenState extends State<NewsDetailScreen> {
+  final _db = AppDatabase.instance;
+  bool _isFavorite = false;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    final exists = await _db.exists(widget.article.id);
+    if (!mounted) return;
+    setState(() {
+      _isFavorite = exists;
+      _loading = false;
+    });
+  }
+
+  Future<void> _toggle() async {
+    if (_isFavorite) {
+      await _db.delete(widget.article.id);
+    } else {
+      final savedAt = DateTime.now().toIso8601String();
+      await _db.insert(Favorite.fromArticle(widget.article, savedAt));
+    }
+    if (!mounted) return;
+    setState(() => _isFavorite = !_isFavorite);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(_isFavorite ? 'Salvo nos favoritos' : 'Removido'),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final article = widget.article;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(article.author),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          tooltip: 'Voltar',
-          onPressed: () => _close(context),
-        ),
-      ),
+      appBar: AppBar(title: Text(article.author)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -52,17 +81,13 @@ class NewsDetailScreen extends StatelessWidget {
           Text(article.body, style: const TextStyle(fontSize: 16, height: 1.5)),
         ],
       ),
-      floatingActionButton: ListenableBuilder(
-        listenable: favoritesStore,
-        builder: (context, _) {
-          final bool fav = favoritesStore.isFavorite(article.id);
-          return FloatingActionButton.extended(
-            onPressed: () => favoritesStore.toggle(article.id),
-            icon: Icon(fav ? Icons.bookmark : Icons.bookmark_border),
-            label: Text(fav ? 'Salvo' : 'Salvar'),
-          );
-        },
-      ),
+      floatingActionButton: _loading
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _toggle,
+              icon: Icon(_isFavorite ? Icons.bookmark : Icons.bookmark_border),
+              label: Text(_isFavorite ? 'Salvo' : 'Salvar'),
+            ),
     );
   }
 }

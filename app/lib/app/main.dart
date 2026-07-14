@@ -1,10 +1,21 @@
+import 'dart:io';
+
 import 'package:app/app/routes.dart';
+import 'package:app/core/services/secure_storage_service.dart';
 import 'package:app/modules/auth/login_screen.dart';
-import 'package:app/modules/settings/settings_screen.dart';
-import 'package:app/modules/shell/main_scaffold.dart';
+import 'package:app/modules/news/news_list_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // No desktop o sqflite usa a implementação FFI (a mesma API).
+  if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+
   runApp(const MyApp());
 }
 
@@ -14,21 +25,52 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MyNews',
+      title: 'NewsHub',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      // The app opens straight into the shell — there is no login gate.
-      // The login screen exists only as the target of the Drawer's "Logout"
-      // (pushReplacement), which is a required navigation case (req #2).
-      initialRoute: AppRoutes.main,
-      // Centralized named routes for the ROOT navigator (requirement #1).
+      home: const _Bootstrap(),
       routes: {
-        AppRoutes.main: (_) => const MainScaffold(),
         AppRoutes.login: (_) => const LoginScreen(),
-        AppRoutes.settings: (_) => const SettingsScreen(),
+        AppRoutes.news: (_) => const NewsListScreen(),
       },
     );
+  }
+}
+
+// Ao abrir o app, se já existe token guardado vai direto para a consulta.
+class _Bootstrap extends StatefulWidget {
+  const _Bootstrap();
+
+  @override
+  State<_Bootstrap> createState() => _BootstrapState();
+}
+
+class _BootstrapState extends State<_Bootstrap> {
+  @override
+  void initState() {
+    super.initState();
+    _decide();
+  }
+
+  Future<void> _decide() async {
+    String? token;
+    try {
+      token = await secureStorage.readToken();
+    } catch (_) {
+      token = null;
+    }
+
+    if (!mounted) return;
+    final route = (token != null && token.isNotEmpty)
+        ? AppRoutes.news
+        : AppRoutes.login;
+    Navigator.of(context).pushReplacementNamed(route);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
